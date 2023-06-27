@@ -45,14 +45,17 @@ def scheme_read(src):
     if val == 'nil':
         # BEGIN PROBLEM 2
         "*** YOUR CODE HERE ***"
+        return nil
         # END PROBLEM 2
     elif val == '(':
         # BEGIN PROBLEM 2
         "*** YOUR CODE HERE ***"
+        return read_tail(src)
         # END PROBLEM 2
     elif val == "'":
         # BEGIN PROBLEM 3
         "*** YOUR CODE HERE ***"
+        return Pair('quote', Pair(scheme_read(src), nil))
         # END PROBLEM 3
     elif val not in DELIMITERS:
         return val
@@ -74,10 +77,17 @@ def read_tail(src):
         elif src.current() == ')':
             # BEGIN PROBLEM 2
             "*** YOUR CODE HERE ***"
+            src.pop_first()
+            return nil
             # END PROBLEM 2
         else:
             # BEGIN PROBLEM 2
             "*** YOUR CODE HERE ***"
+            # p = q = Pair(nil, nil)
+            # while src.current() != ')':
+            #     q.rest = Pair(scheme_read(src), nil)
+            #     q = q.rest
+            return Pair(scheme_read(src), read_tail(src))
             # END PROBLEM 2
     except EOFError:
         raise SyntaxError('unexpected end of file')
@@ -104,7 +114,8 @@ def read_line(line):
     buf = Buffer(tokenize_lines([line]))
     result = scheme_read(buf)
     if buf.more_on_line():
-        raise SyntaxError("read_line's argument can only be a single element, but received multiple")
+        raise SyntaxError(
+            "read_line's argument can only be a single element, but received multiple")
     return result
 
 # Interactive loop
