@@ -20,6 +20,8 @@ class Frame:
         """An empty frame with parent frame PARENT (which may be None)."""
         # BEGIN Problem 1
         "*** YOUR CODE HERE ***"
+        self.parent = parent
+        self.bindings = {}
         # END Problem 1
 
     def __repr__(self):
@@ -32,10 +34,15 @@ class Frame:
         """Define Scheme SYMBOL to have VALUE."""
         # BEGIN Problem 1
         "*** YOUR CODE HERE ***"
+        self.bindings[symbol] = value
         # END Problem 1
 
     # BEGIN Problem 1
-    "*** YOUR CODE HERE ***"
+    def __getitem__(self, symbol):
+        if symbol in self.bindings:
+            return self.bindings[symbol]
+        else:
+            raise SchemeError()
     # END Problem 1
 
 ##############

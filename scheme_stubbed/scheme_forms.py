@@ -14,4 +14,10 @@ logic for each special form separately somehow, which you can do here.
 
 # BEGIN PROBLEM 1/2/3
 "*** YOUR CODE HERE ***"
+
+
+def define(scheme_list, env):
+    name, body = scheme_list.first, scheme_list.rest
+    env.define(name, scheme_eval(body, env))
+    return name
 # END PROBLEM 1/2/3

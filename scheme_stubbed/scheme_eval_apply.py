@@ -23,7 +23,35 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
     """
     # BEGIN Problem 1/2
     "*** YOUR CODE HERE ***"
+    if scheme_symbolp(expr):
+        return env[expr]
+    elif self_evaluating(expr):
+        return expr
+    first, rest = expr.first, expr.rest
+
+    if first == 'define':
+        return scheme_forms.define(rest, env)
+    procedure = scheme_eval(first, env)
+    args = rest.map(lambda operand: scheme_eval(operand, env))
+    if not scheme_procedurep(procedure) and len(args) == 0:
+        return procedure
+    return scheme_apply(procedure, args, env)
+
     # END Problem 1/2
+
+
+def reduce(scheme_list):
+    """Reduce a recursive list of Pairs using fn and a start value.
+
+    >>> reduce(add, as_scheme_list(1, 2, 3), 0)
+    6
+    """
+    s = []
+    rest = scheme_list
+    while isinstance(rest, Pair):
+        s += [rest.first]
+        rest = rest.rest
+    return s
 
 
 def scheme_apply(procedure, args, env):
@@ -31,6 +59,19 @@ def scheme_apply(procedure, args, env):
     Frame ENV, the current environment."""
     # BEGIN Problem 1/2
     "*** YOUR CODE HERE ***"
+    validate_procedure(procedure)
+
+    if isinstance(procedure, BuiltinProcedure):
+        try:
+            a = reduce(args)
+            if procedure.need_env:
+                return procedure.py_func(*a, env)
+            else:
+                return procedure.py_func(*a)
+        except TypeError:
+            raise SchemeError(
+                'incorrect number of arguments: {0}'.format(procedure))
+
     # END Problem 1/2
 
 
