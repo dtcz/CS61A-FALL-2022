@@ -31,12 +31,16 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
 
     if first == 'define':
         return scheme_forms.define(rest, env)
+    elif first == 'quote':
+        return scheme_forms.quote(rest, env)
+    elif first == 'begin':
+        return scheme_forms.begin(rest, env)
+    
     procedure = scheme_eval(first, env)
     args = rest.map(lambda operand: scheme_eval(operand, env))
     if not scheme_procedurep(procedure) and len(args) == 0:
         return procedure
     return scheme_apply(procedure, args, env)
-
     # END Problem 1/2
 
 
