@@ -28,14 +28,28 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
     elif self_evaluating(expr):
         return expr
     first, rest = expr.first, expr.rest
-
+    # print("DEBUG: ", expr, first, rest)
     if first == 'define':
         return scheme_forms.define(rest, env)
     elif first == 'quote':
         return scheme_forms.quote(rest, env)
     elif first == 'begin':
         return scheme_forms.begin(rest, env)
-    
+    elif first == 'lambda':
+        return scheme_forms.lambda_form(rest, env)
+    elif first == 'and':
+        return scheme_forms.and_form(rest, env)
+    elif first == 'or':
+        return scheme_forms.or_form(rest, env)
+    elif first == 'if':
+        return scheme_forms.if_form(rest, env)
+    elif first == 'cond':
+        return scheme_forms.cond_form(rest, env)
+    elif first == 'let':
+        return scheme_forms.let_form(rest, env)
+    elif first == 'mu':
+        return scheme_forms.mu_form(rest, env)
+
     procedure = scheme_eval(first, env)
     args = rest.map(lambda operand: scheme_eval(operand, env))
     if not scheme_procedurep(procedure) and len(args) == 0:
@@ -75,6 +89,37 @@ def scheme_apply(procedure, args, env):
         except TypeError:
             raise SchemeError(
                 'incorrect number of arguments: {0}'.format(procedure))
+    elif isinstance(procedure, LambdaProcedure):
+        try:
+            validate_type(args, scheme_listp, 1, 'scheme_apply')
+            formals = procedure.formals
+            if len(args) != len(formals):
+                raise SchemeError('incorrect args len and formal len')
+            currEnv = Frame(procedure.env)
+            while args is not nil:
+                currEnv.define(formals.first, args.first)
+                formals = formals.rest
+                args = args.rest
+
+            return scheme_forms.begin(procedure.body, currEnv)
+        except TypeError:
+            raise SchemeError(
+                'incorrect number of arguments: {0}'.format(procedure))
+    elif isinstance(procedure, MuProcedure):
+        try:
+            validate_type(args, scheme_listp, 1, 'scheme_apply')
+            formals = procedure.formals
+            if len(args) != len(formals):
+                raise SchemeError('incorrect args len and formal len')
+            currEnv = Frame(env)
+            while args is not nil:
+                currEnv.define(formals.first, args.first)
+                formals = formals.rest
+                args = args.rest
+            return scheme_forms.begin(procedure.body, currEnv)
+        except TypeError:
+            raise SchemeError(
+                'incorrect number of arguments: {0}'.format(procedure))
 
     # END Problem 1/2
 
@@ -86,6 +131,12 @@ def scheme_apply(procedure, args, env):
 # Make classes/functions for creating tail recursive programs here!
 # BEGIN Problem EC
 "*** YOUR CODE HERE ***"
+
+
+class Unevaluated:
+    def __init__(self, expr, env):
+        self.expr = expr
+        self.env = env
 # END Problem EC
 
 
@@ -95,5 +146,5 @@ def complete_apply(procedure, args, env):
     if you attempt the extra credit."""
     validate_procedure(procedure)
     # BEGIN
-    return val
+    return scheme_apply(procedure, args, env)
     # END

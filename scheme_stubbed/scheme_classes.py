@@ -39,10 +39,14 @@ class Frame:
 
     # BEGIN Problem 1
     def __getitem__(self, symbol):
-        if symbol in self.bindings:
-            return self.bindings[symbol]
+        curr = self
+        
+        while curr and (not (symbol in curr.bindings)):
+            curr = curr.parent
+        if curr and symbol in curr.bindings:
+            return curr.bindings[symbol]
         else:
-            raise SchemeError()
+            raise SchemeError('not get symbol in frame: ' + symbol)
     # END Problem 1
 
 ##############
