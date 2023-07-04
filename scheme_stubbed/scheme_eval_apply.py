@@ -49,8 +49,12 @@ def scheme_eval(expr, env, _=None):  # Optional third argument is ignored
         return scheme_forms.let_form(rest, env)
     elif first == 'mu':
         return scheme_forms.mu_form(rest, env)
+    elif first == 'define-macro':
+        return scheme_forms.define_macro_form(rest, env)
 
     procedure = scheme_eval(first, env)
+    if isinstance(procedure, MacroProcedure):
+        return scheme_apply(procedure, rest, env)
     args = rest.map(lambda operand: scheme_eval(operand, env))
     if not scheme_procedurep(procedure) and len(args) == 0:
         return procedure
@@ -89,6 +93,20 @@ def scheme_apply(procedure, args, env):
         except TypeError:
             raise SchemeError(
                 'incorrect number of arguments: {0}'.format(procedure))
+    elif isinstance(procedure, MacroProcedure):
+        # try:
+        validate_type(args, scheme_listp, 1, 'scheme_apply')
+        formals = procedure.formals
+        if len(args) != len(formals):
+            raise SchemeError('incorrect args len and formal len')
+        currEnv = Frame(env)
+        while args is not nil:
+            currEnv.define(formals.first, args.first)
+            formals = formals.rest
+            args = args.rest
+
+        ret = scheme_eval(procedure.body, currEnv)
+        return scheme_eval(ret, env)
     elif isinstance(procedure, LambdaProcedure):
         try:
             validate_type(args, scheme_listp, 1, 'scheme_apply')

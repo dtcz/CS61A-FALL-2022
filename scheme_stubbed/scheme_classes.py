@@ -40,7 +40,7 @@ class Frame:
     # BEGIN Problem 1
     def __getitem__(self, symbol):
         curr = self
-        
+
         while curr and (not (symbol in curr.bindings)):
             curr = curr.parent
         if curr and symbol in curr.bindings:
@@ -120,3 +120,7 @@ class MuProcedure(Procedure):
     def __repr__(self):
         return 'MuProcedure({0}, {1})'.format(
             repr(self.formals), repr(self.body))
+
+
+class MacroProcedure(LambdaProcedure):
+    """macro"""

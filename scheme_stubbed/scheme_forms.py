@@ -126,4 +126,17 @@ def mu_form(scheme_list, env):
     ret = MuProcedure(formals, body)
     return ret
 
+
+def define_macro_form(scheme_list, env):
+    first, body = scheme_list.first, scheme_list.rest
+    if scheme_listp(first):
+        name, formals = first.first, first.rest
+        if not scheme_symbolp(name):
+            raise SchemeError("name must be a valid Scheme symbol")
+        if not body:
+            raise SchemeError("body miss")
+        env.define(name, MacroProcedure(formals, body, env))
+        return name
+    raise SchemeError("improper form for define-macro")
+
 # END PROBLEM 1/2/3
