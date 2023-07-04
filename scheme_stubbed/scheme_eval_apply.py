@@ -100,7 +100,6 @@ def scheme_apply(procedure, args, env):
                 currEnv.define(formals.first, args.first)
                 formals = formals.rest
                 args = args.rest
-
             return scheme_forms.begin(procedure.body, currEnv)
         except TypeError:
             raise SchemeError(
@@ -137,6 +136,25 @@ class Unevaluated:
     def __init__(self, expr, env):
         self.expr = expr
         self.env = env
+
+
+def optimize_tail_calls(unoptimized_scheme_eval):
+    """Return a properly tail recursive version of an eval function."""
+    def optimized_eval(expr, env, tail=False):
+        """Evaluate Scheme expression EXPR in Frame ENV. If TAIL,
+        return an Unevaluated containing an expression for further evaluation.
+        """
+        if tail and not scheme_symbolp(expr) and not self_evaluating(expr):
+            return Unevaluated(expr, env)
+        result = Unevaluated(expr, env)
+
+        while isinstance(result, Unevaluated):
+            result = unoptimized_scheme_eval(result.expr, result.env)
+        return result
+    return optimized_eval
+
+
+scheme_eval = optimize_tail_calls(scheme_eval)
 # END Problem EC
 
 
@@ -146,5 +164,9 @@ def complete_apply(procedure, args, env):
     if you attempt the extra credit."""
     validate_procedure(procedure)
     # BEGIN
-    return scheme_apply(procedure, args, env)
+    val = scheme_apply(procedure, args, env)
+    if isinstance(val, Unevaluated):
+        return scheme_eval(val.expr, val.env)
+    else:
+        return val
     # END

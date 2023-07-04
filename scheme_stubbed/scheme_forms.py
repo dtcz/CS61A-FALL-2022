@@ -38,8 +38,8 @@ def quote(scheme_list, env):
 
 
 def begin(scheme_list, env):
-    ret = scheme_eval(scheme_list.first, env)
-    if scheme_list.rest:
+    ret = scheme_eval(scheme_list.first, env, scheme_list.rest is nil)
+    if scheme_list.rest is not nil:
         return begin(scheme_list.rest, env)
     return ret
 
@@ -55,7 +55,7 @@ def lambda_form(scheme_list, env):
 def and_form(scheme_list, env):
     if scheme_list is nil or scheme_list.first is nil:
         return True
-    ret = scheme_eval(scheme_list.first, env)
+    ret = scheme_eval(scheme_list.first, env, scheme_list.rest is nil)
     if is_scheme_false(ret) or scheme_list.rest is nil:
         return ret
     return and_form(scheme_list.rest, env)
@@ -64,7 +64,7 @@ def and_form(scheme_list, env):
 def or_form(scheme_list, env):
     if scheme_list is nil or scheme_list.first is nil:
         return False
-    ret = scheme_eval(scheme_list.first, env)
+    ret = scheme_eval(scheme_list.first, env, scheme_list.rest is nil)
     if is_scheme_true(ret) or scheme_list.rest is nil:
         return ret
     return or_form(scheme_list.rest, env)
@@ -73,9 +73,9 @@ def or_form(scheme_list, env):
 def if_form(scheme_list, env):
     predicate, body = scheme_list.first, scheme_list.rest
     if is_scheme_true(scheme_eval(predicate, env)):
-        return scheme_eval(body.first, env)
+        return scheme_eval(body.first, env, True)
     elif body and body.rest:
-        return scheme_eval(body.rest.first, env)
+        return scheme_eval(body.rest.first, env, True)
 
 
 def cond_form(scheme_list, env):
